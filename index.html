@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<!-- HTML5 Hello world by kirupa - http://www.kirupa.com/html5/getting_your_feet_wet_html5_pg1.htm -->
+<html lang="en-us">
+
+<head>
+<meta charset="utf-8">
+<title>Hello...</title>
+<style type="text/css">
+
+</style>
+</head>
+
+<body>
+
+<ul>
+	<li target="shift">Shift</li>
+	<li target="bit-shift">Bit shift</li>
+</ul>
+
+<div id="shift" style="display:none">
+	<button id="left-to-right-shift">Left to right shift</button>
+	<button id="right-to-left-shift">Right to left shift</button>
+	<br>
+	<label>
+		Shift value
+		<input type="text" id="shift-value" value="10">
+	</label>
+</div>
+
+<div id="bit-shift" style="display:none">
+	<button id="left-to-right-bit-shift">Left to right bit shift</button>
+	<button id="right-to-left-bit-shift">Right to left bit shift</button>
+	<br>
+	<label>
+		Character number
+		<input type="text" id="bit-shift-item-number" value="0">
+	</label>
+	<label>
+		Shift value
+		<input type="text" id="bit-shift-value" value="10">
+	</label>
+</div>
+
+<hr>
+
+<textarea id="text-original" style="width:50%;height:300px">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</textarea>
+<textarea id="text-encoded" style="width:50%;height:300px"></textarea>
+		
+<script>
+
+var Encoder = function(sText)
+{
+	this.sText = sText || '';
+	
+	this.fnLeftToRightShiftArray = function(aArray)
+	{
+		var sBuffer = aArray[aArray.length-1];
+		
+		for (var iIndex=aArray.length-2; iIndex>=0; iIndex--) {
+			aArray[iIndex+1] = aArray[iIndex];
+		}
+		
+		aArray[0] = sBuffer;
+
+		return aArray;
+	}
+	
+	this.fnRightToLeftShiftArray = function(aArray)
+	{
+		var sBuffer = aArray[0];
+		
+		for (var iIndex=0; iIndex<aArray.length-1; iIndex++) {
+			aArray[iIndex] = aArray[iIndex+1];
+		}
+		
+		aArray[aArray.length-1] = sBuffer;
+
+		return aArray;
+	}
+	
+	this.fnLeftToRightShift = function(iShift)
+	{
+		var aResult = this.sText.split('');
+		
+		for (var iIndex=0; iIndex<iShift; iIndex++) {
+			aResult = this.fnLeftToRightShiftArray(aResult);
+		}
+		
+		return aResult.join('');
+	}
+	
+	this.fnRightToLeftShift = function(iShift)
+	{
+		var aResult = this.sText.split('');
+		
+		for (var iIndex=0; iIndex<iShift; iIndex++) {
+			aResult = this.fnRightToLeftShiftArray(aResult);
+		}
+		
+		return aResult.join('');
+	}
+};
+
+var oEncoder = new Encoder(document.getElementById("text").value);
+
+document
+	.addEventListener(
+		"click",
+		function(oEvent)
+		{
+			if (oEvent.target.id=="left-to-right-shift") {
+				oEncoder.sText = document.getElementById("text").value;
+				document.getElementById("text").value = oEncoder.fnLeftToRightShift(10);
+			}
+			
+			if (oEvent.target.id=="right-to-left-shift") {
+				oEncoder.sText = document.getElementById("text").value;
+				document.getElementById("text").value = oEncoder.fnRightToLeftShift(10);
+			}
+		}
+	);
+
+</script>
+
+</body>
+</html>
