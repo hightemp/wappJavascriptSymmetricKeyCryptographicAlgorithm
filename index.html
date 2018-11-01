@@ -91,7 +91,7 @@ var Encoder = function(sText)
 		}
 		
 		for (var iIndex = 0; iIndex<iValuesBlockLength; iIndex++) {
-			aResult.push(Math.floor(Math.random()*256));
+			aResult.push(Math.floor(Math.random()*5));
 		}
 		
 		this.aKey = aResult;
@@ -136,7 +136,7 @@ var Encoder = function(sText)
 						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex);
 						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
 						
-						for (var iIndex=0; iIndex<iShift; iIndex++) {
+						for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
 							aBitArray = this.fnLeftToRightShiftArray(aBitArray);
 						}
 				
@@ -148,7 +148,7 @@ var Encoder = function(sText)
 						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex);
 						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
 						
-						for (var iIndex=0; iIndex<iShift; iIndex++) {
+						for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
 							aBitArray = this.fnRightToLeftShiftArray(aBitArray);
 						}
 				
