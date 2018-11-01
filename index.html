@@ -54,10 +54,6 @@
 	<button id="right-to-left-bit-shift">Right to left bit shift</button>
 	<br>
 	<label>
-		Character number
-		<input type="text" id="bit-shift-item-number" value="0">
-	</label>
-	<label>
 		Shift value
 		<input type="text" id="bit-shift-value" value="10">
 	</label>
@@ -79,7 +75,7 @@ var Encoder = function(sText)
 	this.fnGenerateKey = function()
 	{
 		var aResult = [];
-		var iCommands = 5;
+		var iCommands = 4;
 		
 		var iCommandsBlockLength = Math.floor(Math.random()*156+100);
 		aResult.push(iCommandsBlockLength);
@@ -91,7 +87,7 @@ var Encoder = function(sText)
 		}
 		
 		for (var iIndex = 0; iIndex<iValuesBlockLength; iIndex++) {
-			aResult.push(Math.floor(Math.random()*5));
+			aResult.push(Math.floor(Math.random()*256));
 		}
 		
 		this.aKey = aResult;
@@ -170,6 +166,61 @@ var Encoder = function(sText)
 	this.fnDecrypt = function()
 	{
 		var aResult = this.sText.split('');
+		
+		var iCommandsBlockLength = this.aKey[0];
+		var iValuesBlockLength = this.aKey[1];
+		
+		var iLastPosition = 2+iCommandsBlockLength;
+		var aCommands = this.aKey.slice(2, iLastPosition);
+		var aValues = this.aKey.slice(iLastPosition, iLastPosition+iValuesBlockLength);
+		iLastPosition = iLastPosition+iValuesBlockLength;
+		
+		for (var iCommandIndex=iCommandsBlockLength-1; iCommandIndex>=0; iCommandIndex--) {
+			switch (aCommands[iCommandIndex]) {
+				case 0:
+					var iShift = this.fnGetValueFromArrayLooped(aValues, iCommandIndex);
+					for (var iIndex=0; iIndex<iShift; iIndex++) {
+						aResult = this.fnRightToLeftShiftArray(aResult);
+					}
+					break;
+				case 1:
+					var iShift = this.fnGetValueFromArrayLooped(aValues, iCommandIndex);
+					for (var iIndex=0; iIndex<iShift; iIndex++) {
+						aResult = this.fnLeftToRightShiftArray(aResult);
+					}
+					break;
+				case 2:
+					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
+						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex);
+						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+						
+						for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
+							aBitArray = this.fnRightToLeftShiftArray(aBitArray);
+						}
+				
+						aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+					}
+					break;
+				case 3:
+					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
+						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex);
+						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+						
+						for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
+							aBitArray = this.fnLeftToRightShiftArray(aBitArray);
+						}
+				
+						aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+					}
+					break;
+				case 4:
+					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
+						var iMask = this.fnGetValueFromArrayLooped(aValues, iIndex);
+						aResult[iIndex] = String.fromCharCode(aResult[iIndex].charCodeAt(0) ^ iMask);
+					}
+					break;
+			}
+		}
 		
 		return aResult.join('');
 	}
@@ -250,33 +301,37 @@ var Encoder = function(sText)
 		return iInteger;
 	}
 	
-	this.fnLeftToRightBitShift = function(iShift, iPosition)
+	this.fnLeftToRightBitShift = function(iShift)
 	{
 		var aResult = this.sText.split('');
 		
-		var aBitArray = this.fnConvertIntToBitArray(aResult[iPosition].charCodeAt(0), 1);
-		
-		for (var iIndex=0; iIndex<iShift; iIndex++) {
-			aBitArray = this.fnLeftToRightShiftArray(aBitArray);
+		for (var iIndex=0; iIndex<aResult.length; iIndex++) {
+			var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+			
+			for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
+				aBitArray = this.fnLeftToRightShiftArray(aBitArray);
+			}
+	
+			aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
 		}
-
-		aResult[iPosition] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
-
+		
 		return aResult.join('');
 	}
 	
-	this.fnRightToLeftBitShift = function(iShift, iPosition)
+	this.fnRightToLeftBitShift = function(iShift)
 	{
 		var aResult = this.sText.split('');
 		
-		var aBitArray = this.fnConvertIntToBitArray(aResult[iPosition].charCodeAt(0), 1);
-		
-		for (var iIndex=0; iIndex<iShift; iIndex++) {
-			aBitArray = this.fnRightToLeftShiftArray(aBitArray);
+		for (var iIndex=0; iIndex<aResult.length; iIndex++) {
+			var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+			
+			for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
+				aBitArray = this.fnRightToLeftShiftArray(aBitArray);
+			}
+	
+			aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
 		}
-
-		aResult[iPosition] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
-
+		
 		return aResult.join('');
 	}
 };
@@ -289,6 +344,7 @@ document
 		function(oEvent)
 		{
 			if (oEvent.target.id=="generate-key") {
+				$("#key-bytes").val('');
 				oEncoder.fnGenerateKey();
 				for (var iIndex=0; iIndex<oEncoder.aKey.length; iIndex++) {
 					$("#key-bytes").val($("#key-bytes").val()+' '+oEncoder.aKey[iIndex].toString(16));
@@ -296,11 +352,14 @@ document
 			}
 			
 			if (oEvent.target.id=="encrypt") {
+				if ($("#text-encoded").val().trim()!='')
+					$("#text-original").val($("#text-encoded").val());
 				oEncoder.sText = $("#text-original").val();
 				$("#text-encoded").val(oEncoder.fnEncrypt());
 			}
 			
 			if (oEvent.target.id=="decrypt") {
+				$("#text-original").val($("#text-encoded").val());
 				oEncoder.sText = $("#text-original").val();
 				$("#text-encoded").val(oEncoder.fnDecrypt());
 			}
@@ -319,8 +378,7 @@ document
 				oEncoder.sText = $("#text-original").val();
 				$("#text-encoded").val(
 					oEncoder.fnLeftToRightBitShift(
-						$("#bit-shift-value").val(),
-						$("#bit-shift-item-number").val()
+						$("#bit-shift-value").val()
 					)
 				);
 			}
@@ -329,8 +387,7 @@ document
 				oEncoder.sText = $("#text-original").val();
 				$("#text-encoded").val(
 					oEncoder.fnRightToLeftBitShift(
-						$("#bit-shift-value").val(),
-						$("#bit-shift-item-number").val()
+						$("#bit-shift-value").val()
 					)
 				);
 			}
