@@ -5,19 +5,42 @@
 <head>
 <meta charset="utf-8">
 <title>Hello...</title>
-<style type="text/css">
 
-</style>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>  
+
 </head>
 
 <body>
 
-<ul>
-	<li target="shift">Shift</li>
-	<li target="bit-shift">Bit shift</li>
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link" id="key-tab" data-toggle="tab" href="#key" role="tab" aria-controls="key" aria-selected="true">Key</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="shift-tab" data-toggle="tab" href="#shift" role="tab" aria-controls="shift" aria-selected="true">Shift</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="bit-shift-tab" data-toggle="tab" href="#bit-shift" role="tab" aria-controls="bit-shift" aria-selected="false">Bit shift</a>
+  </li>
 </ul>
-
-<div id="shift" style="display:none">
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade" id="key" role="tabpanel" aria-labelledby="key-tab">
+  	<button id="generate-key">Generate</button>
+  	<button id="encrypt">Encrypt</button>
+  	<button id="decrypt">Decrypt</button>
+  	<br>
+  	<textarea id="key-bytes" style="width:100%"></textarea>
+  </div>
+  <div class="tab-pane fade" id="shift" role="tabpanel" aria-labelledby="shift-tab">
 	<button id="left-to-right-shift">Left to right shift</button>
 	<button id="right-to-left-shift">Right to left shift</button>
 	<br>
@@ -25,9 +48,8 @@
 		Shift value
 		<input type="text" id="shift-value" value="10">
 	</label>
-</div>
-
-<div id="bit-shift" style="display:none">
+  </div>
+  <div class="tab-pane fade" id="bit-shift" role="tabpanel" aria-labelledby="bit-shift-tab">
 	<button id="left-to-right-bit-shift">Left to right bit shift</button>
 	<button id="right-to-left-bit-shift">Right to left bit shift</button>
 	<br>
@@ -39,18 +61,118 @@
 		Shift value
 		<input type="text" id="bit-shift-value" value="10">
 	</label>
+  </div>
 </div>
 
 <hr>
 
-<textarea id="text-original" style="width:50%;height:300px">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</textarea>
-<textarea id="text-encoded" style="width:50%;height:300px"></textarea>
+<textarea id="text-original" style="width:49%;height:300px">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</textarea>
+<textarea id="text-encoded" style="width:49%;height:300px"></textarea>
 		
 <script>
 
 var Encoder = function(sText)
 {
 	this.sText = sText || '';
+	this.aKey = [];
+	
+	this.fnGenerateKey = function()
+	{
+		var aResult = [];
+		var iCommands = 5;
+		
+		var iCommandsBlockLength = Math.floor(Math.random()*156+100);
+		aResult.push(iCommandsBlockLength);
+		var iValuesBlockLength = Math.floor(Math.random()*156+100);
+		aResult.push(iValuesBlockLength);
+		
+		for (var iIndex = 0; iIndex<iCommandsBlockLength; iIndex++) {
+			aResult.push(Math.floor(Math.random()*iCommands));
+		}
+		
+		for (var iIndex = 0; iIndex<iValuesBlockLength; iIndex++) {
+			aResult.push(Math.floor(Math.random()*256));
+		}
+		
+		this.aKey = aResult;
+	}
+	
+	this.fnGetValueFromArrayLooped = function(aArray, iPosition)
+	{
+		if (iPosition=>aArray.length)
+			iPosition = iPosition % aArray.length;
+			
+		return aArray[iPosition];
+	}
+	
+	this.fnEncrypt = function()
+	{
+		var aResult = this.sText.split('');
+		
+		var iCommandsBlockLength = this.aKey[0];
+		var iValuesBlockLength = this.aKey[1];
+		
+		var iLastPosition = 2+iCommandsBlockLength;
+		var aCommands = this.aKey.slice(2, iLastPosition);
+		var aValues = this.aKey.slice(iLastPosition, iLastPosition+iValuesBlockLength);
+		iLastPosition = iLastPosition+iValuesBlockLength;
+		
+		for (var iCommandIndex=0; iCommandIndex<iCommandsBlockLength; iCommandIndex++) {
+			switch (aCommands[iCommandIndex]) {
+				case 0:
+					var iShift = this.fnGetValueFromArrayLooped(aValues, iCommandIndex);
+					for (var iIndex=0; iIndex<iShift; iIndex++) {
+						aResult = this.fnLeftToRightShiftArray(aResult);
+					}
+					break;
+				case 1:
+					var iShift = this.fnGetValueFromArrayLooped(aValues, iCommandIndex);
+					for (var iIndex=0; iIndex<iShift; iIndex++) {
+						aResult = this.fnRightToLeftShiftArray(aResult);
+					}
+					break;
+				case 2:
+					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
+						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex);
+						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+						
+						for (var iIndex=0; iIndex<iShift; iIndex++) {
+							aBitArray = this.fnLeftToRightShiftArray(aBitArray);
+						}
+				
+						aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+					}
+					break;
+				case 3:
+					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
+						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex);
+						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+						
+						for (var iIndex=0; iIndex<iShift; iIndex++) {
+							aBitArray = this.fnRightToLeftShiftArray(aBitArray);
+						}
+				
+						aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+					}
+					break;
+				case 4:
+					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
+						var iMask = this.fnGetValueFromArrayLooped(aValues, iIndex);
+						aResult[iIndex] = String.fromCharCode(aResult[iIndex].charCodeAt(0) ^ iMask);
+					}
+					break;
+			}
+		}
+		
+		return aResult.join('');
+	}
+	
+	this.fnDecrypt = function()
+	{
+		var aResult = this.sText.split('');
+		
+		return aResult.join('');
+	}
 	
 	this.fnLeftToRightShiftArray = function(aArray)
 	{
@@ -99,26 +221,123 @@ var Encoder = function(sText)
 		
 		return aResult.join('');
 	}
+	
+	this.fnConvertIntToBitArray = function(iInteger, iMaxSize)
+	{
+		var aResult = [];
+		
+		iMaxSize = iMaxSize || 1;
+		iMaxSize = iMaxSize*8;
+		
+		for (var iIndex=iMaxSize-1; iIndex>=0; iIndex--) {
+			aResult.push(iInteger >> iIndex & 1);
+		}
+		
+		return aResult;
+	}
+	
+	this.fnConvertBitArrayToInt = function(aArray, iMaxSize)
+	{
+		var iInteger = 0;
+		
+		iMaxSize = iMaxSize || 1;
+		iMaxSize = iMaxSize*8;
+		
+		for (var iIndex=iMaxSize-1; iIndex>=0; iIndex--) {
+			iInteger = iInteger | (aArray[iIndex] << (iMaxSize-1 - iIndex));
+		}
+		
+		return iInteger;
+	}
+	
+	this.fnLeftToRightBitShift = function(iShift, iPosition)
+	{
+		var aResult = this.sText.split('');
+		
+		var aBitArray = this.fnConvertIntToBitArray(aResult[iPosition].charCodeAt(0), 1);
+		
+		for (var iIndex=0; iIndex<iShift; iIndex++) {
+			aBitArray = this.fnLeftToRightShiftArray(aBitArray);
+		}
+
+		aResult[iPosition] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+
+		return aResult.join('');
+	}
+	
+	this.fnRightToLeftBitShift = function(iShift, iPosition)
+	{
+		var aResult = this.sText.split('');
+		
+		var aBitArray = this.fnConvertIntToBitArray(aResult[iPosition].charCodeAt(0), 1);
+		
+		for (var iIndex=0; iIndex<iShift; iIndex++) {
+			aBitArray = this.fnRightToLeftShiftArray(aBitArray);
+		}
+
+		aResult[iPosition] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+
+		return aResult.join('');
+	}
 };
 
-var oEncoder = new Encoder(document.getElementById("text").value);
+var oEncoder = new Encoder();
 
 document
 	.addEventListener(
 		"click",
 		function(oEvent)
 		{
+			if (oEvent.target.id=="generate-key") {
+				oEncoder.fnGenerateKey();
+				for (var iIndex=0; iIndex<oEncoder.aKey.length; iIndex++) {
+					$("#key-bytes").val($("#key-bytes").val()+' '+oEncoder.aKey[iIndex].toString(16));
+				}
+			}
+			
+			if (oEvent.target.id=="encrypt") {
+				oEncoder.sText = $("#text-original").val();
+				$("#text-encoded").val(oEncoder.fnEncrypt());
+			}
+			
+			if (oEvent.target.id=="decrypt") {
+				oEncoder.sText = $("#text-original").val();
+				$("#text-encoded").val(oEncoder.fnDecrypt());
+			}
+			
 			if (oEvent.target.id=="left-to-right-shift") {
-				oEncoder.sText = document.getElementById("text").value;
-				document.getElementById("text").value = oEncoder.fnLeftToRightShift(10);
+				oEncoder.sText = $("#text-original").val();
+				$("#text-encoded").val(oEncoder.fnLeftToRightShift($("#shift-value").val()));
 			}
 			
 			if (oEvent.target.id=="right-to-left-shift") {
-				oEncoder.sText = document.getElementById("text").value;
-				document.getElementById("text").value = oEncoder.fnRightToLeftShift(10);
+				oEncoder.sText = $("#text-original").val();
+				$("#text-encoded").val(oEncoder.fnRightToLeftShift($("#shift-value").val()));
+			}
+			
+			if (oEvent.target.id=="left-to-right-bit-shift") {
+				oEncoder.sText = $("#text-original").val();
+				$("#text-encoded").val(
+					oEncoder.fnLeftToRightBitShift(
+						$("#bit-shift-value").val(),
+						$("#bit-shift-item-number").val()
+					)
+				);
+			}
+			
+			if (oEvent.target.id=="right-to-left-bit-shift") {
+				oEncoder.sText = $("#text-original").val();
+				$("#text-encoded").val(
+					oEncoder.fnRightToLeftBitShift(
+						$("#bit-shift-value").val(),
+						$("#bit-shift-item-number").val()
+					)
+				);
 			}
 		}
 	);
+
+$('#myTab li:first-child a').tab('show');
 
 </script>
 
