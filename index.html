@@ -72,19 +72,54 @@ var Encoder = function(sText)
 	this.sText = sText || '';
 	this.aKey = [];
 	
+	this.fnShuffleArray = function(aArray) 
+	{
+	    var j, x, i;
+	    for (i = aArray.length - 1; i > 0; i--) {
+	        j = Math.floor(Math.random() * (i + 1));
+	        x = aArray[i];
+	        aArray[i] = aArray[j];
+	        aArray[j] = x;
+	    }
+	    return aArray;
+	}
+	
 	this.fnGenerateKey = function()
 	{
 		var aResult = [];
-		var iCommands = 4;
+		var iCommands = 5;
 		
 		var iCommandsBlockLength = Math.floor(Math.random()*156+100);
 		aResult.push(iCommandsBlockLength);
 		var iValuesBlockLength = Math.floor(Math.random()*156+100);
 		aResult.push(iValuesBlockLength);
 		
+		var iCommandsBlock = iCommandsBlockLength/iCommands;
+		var aCommands = [];
+		
+		for (var iCommandIndex = 0; iCommandIndex<iCommands; iCommandIndex++) {
+			for (var iIndex = 0; iIndex<Math.floor(iCommandsBlock); iIndex++) {
+				aCommands.push(iCommandIndex);
+			}
+			
+			if (iCommandIndex == iCommands - 1) {
+				if (iCommandsBlock != Math.floor(iCommandsBlock)) {
+					for (var iIndex = 0; iIndex<iCommandsBlockLength % iCommands; iIndex++) {
+						aCommands.push(iCommandIndex);
+					}
+				}
+			}
+		}
+		
+		aCommands = this.fnShuffleArray(aCommands);
+		
+		aResult = aResult.concat(aCommands);
+		
+		/*
 		for (var iIndex = 0; iIndex<iCommandsBlockLength; iIndex++) {
 			aResult.push(Math.floor(Math.random()*iCommands));
 		}
+		*/
 		
 		for (var iIndex = 0; iIndex<iValuesBlockLength; iIndex++) {
 			aResult.push(Math.floor(Math.random()*256));
@@ -129,7 +164,7 @@ var Encoder = function(sText)
 					break;
 				case 2:
 					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
-						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex);
+						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex*iCommandIndex);
 						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
 						
 						for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
@@ -141,9 +176,9 @@ var Encoder = function(sText)
 					break;
 				case 3:
 					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
-						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex);
+						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex*iCommandIndex);
 						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
-						
+
 						for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
 							aBitArray = this.fnRightToLeftShiftArray(aBitArray);
 						}
@@ -153,7 +188,7 @@ var Encoder = function(sText)
 					break;
 				case 4:
 					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
-						var iMask = this.fnGetValueFromArrayLooped(aValues, iIndex);
+						var iMask = this.fnGetValueFromArrayLooped(aValues, iIndex*iCommandIndex);
 						aResult[iIndex] = String.fromCharCode(aResult[iIndex].charCodeAt(0) ^ iMask);
 					}
 					break;
@@ -191,7 +226,7 @@ var Encoder = function(sText)
 					break;
 				case 2:
 					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
-						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex);
+						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex*iCommandIndex);
 						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
 						
 						for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
@@ -203,7 +238,7 @@ var Encoder = function(sText)
 					break;
 				case 3:
 					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
-						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex);
+						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex*iCommandIndex);
 						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
 						
 						for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
@@ -215,7 +250,7 @@ var Encoder = function(sText)
 					break;
 				case 4:
 					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
-						var iMask = this.fnGetValueFromArrayLooped(aValues, iIndex);
+						var iMask = this.fnGetValueFromArrayLooped(aValues, iIndex*iCommandIndex);
 						aResult[iIndex] = String.fromCharCode(aResult[iIndex].charCodeAt(0) ^ iMask);
 					}
 					break;
