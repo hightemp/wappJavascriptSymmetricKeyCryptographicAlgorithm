@@ -77,6 +77,8 @@
 var Encoder = function(sText)
 {
 	this.sText = sText || '';
+	this.sResult = '';
+	this.sDictonary = '';
 	this.aKey = [];
 	
 	this.fnShuffleArray = function(aArray) 
@@ -143,6 +145,18 @@ var Encoder = function(sText)
 		return aArray[iPosition];
 	}
 	
+	this.fnEncode = function()
+	{
+		this.sResult;
+		
+		
+	}
+	
+	this.fnDecode = function()
+	{
+		this.sText;
+	}
+	
 	this.fnEncrypt = function()
 	{
 		var aResult = this.sText.split('');
@@ -202,7 +216,7 @@ var Encoder = function(sText)
 			}
 		}
 		
-		return aResult.join('');
+		this.sResult = aResult.join('');
 	}
 	
 	this.fnDecrypt = function()
@@ -264,7 +278,7 @@ var Encoder = function(sText)
 			}
 		}
 		
-		return aResult.join('');
+		this.sResult = aResult.join('');
 	}
 	
 	this.fnLeftToRightShiftArray = function(aArray)
@@ -402,14 +416,24 @@ document
 				//if ($("#text-encoded").val().trim()!='')
 				//	$("#text-original").val($("#text-encoded").val());
 				oEncoder.sText = $("#text-original").val();
-				$("#text-encoded").val(oEncoder.fnEncrypt());
+				oEncoder.fnEncrypt();
+				if ($("#use_dictonary").prop("checked")) {
+					oEncoder.sDictonary = $("#dictonary").val();
+					oEncoder.fnEncode();
+				}
+				$("#text-encoded").val(oEncoder.sResult);
 			}
 			
 			if (oEvent.target.id=="decrypt") {
 				if ($("#text-encoded").val().trim()!='')
 					$("#text-original").val($("#text-encoded").val());
 				oEncoder.sText = $("#text-original").val();
-				$("#text-encoded").val(oEncoder.fnDecrypt());
+				if ($("#use_dictonary").prop("checked")) {
+					oEncoder.sDictonary = $("#dictonary").val();
+					oEncoder.fnDecode();
+				}
+				oEncoder.fnDecrypt();
+				$("#text-encoded").val(oEncoder.sResult);
 			}
 			
 			if (oEvent.target.id=="left-to-right-shift") {
