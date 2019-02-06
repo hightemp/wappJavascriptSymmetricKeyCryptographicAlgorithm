@@ -3274,7 +3274,13 @@ var Encoder = function(sText)
 	
 	this.fnToBigInt = function(iInt)
 	{
+		var aResult = [];
 		
+		for (var iIndex=Math.round(Math.log10(iInt)); iIndex>=0; iIndex--) {
+			aResult.push(Math.round((iInt/Math.pow(10, iIndex))%10));
+		}
+		
+		return aResult;
 	}
 	
 	this.fnBigIntPower = function(aInt1, iBase)
@@ -3284,31 +3290,77 @@ var Encoder = function(sText)
 	
 	this.fnBigIntMultiply = function(aInt1, aInt2)
 	{
+		var aResult = [];
+		var aNumbersToSummarize = [];
+		var iRemainder = 0;
 		
+		for (var iIndex1=0; iIndex1<aInt1.length; iIndex1++) {
+			var aNumber = [];
+			
+			for (var iShiftIndex=0; iShiftIndex<iIndex1; iShiftIndex++) {
+				aNumber.push(0);
+			}
+			
+			for (var iIndex2=0; iIndex2<aInt2.length; iIndex2++) {
+				var iMultiplyResult = aInt1[iIndex1]*aInt2[iIndex2] + iRemainder;
+				
+				aNumber.push(iMultiplyResult % 10);
+				
+				iRemainder = Math.floor(iMultiplyResult / 10);
+			}
+			
+			aNumbersToSummarize.push(aNumber);
+		}
+		
+		return aResult;
 	}
 	
 	this.fnBigIntSummarize  = function(aInt1, aInt2)
 	{
+		var aResult = [];
+		var iRemainder = 0;
+		var iMaxLength = Math.max(aInt1.length, aInt2.length);
 		
+		for (var iIndex=0; iIndex<iMaxLength; iIndex++) {
+			if (typeof aInt1[iIndex] !== 'undefined') {
+				iRemainder += aInt1[iIndex];
+			}
+			
+			if (typeof aInt2[iIndex] !== 'undefined') {
+				iRemainder += aInt2[iIndex];
+			}
+			
+			aResult.push(iSum % 10);
+			
+			iRemainder = Math.floor(iRemainder / 10);
+		}
+		
+		if (iRemainder) {
+			aResult.push(iRemainder);
+		}
+		
+		return aResult;
 	}
 	
-	this.fnEncode = function()
+	this.fnEncode = function(aByteArray)
 	{
-		var aText = this.sResult.split('');
+		var aResult = [];
 		
-		for (var iIndex=0; iIndex<aText.length; iIndex++) {
-			aText[iIndex].charCodeAt(0);
+		for (var iIndex=0; iIndex<aResult.length; iIndex++) {
+			var aNumber = this.fnToBigInt(aResult[iIndex]);
 		}
 
 		return;
 	}
 	
-	this.fnDecode = function()
+	this.fnDecode = function(aByteArray)
 	{
-		this.sText;
+		var aResult = [];
+		
+		return aResult;
 	}
 	
-	this.fnEncrypt = function()
+	this.fnEncrypt = function(bEncode)
 	{
 		//var aResult = this.sText.split('');
 		var oTextEncoder = new TextEncoder();
@@ -3374,17 +3426,25 @@ var Encoder = function(sText)
 			}
 		}
 		
+		if (bEncode) {
+			aResult = this.fnEncode(aResult);
+		}
+		
 		//this.sResult = aResult.join('');
 		var oTextDecoder = new TextDecoder("windows-1251");
 		this.sResult = oTextDecoder.decode(aResult);
 	}
 	
-	this.fnDecrypt = function()
+	this.fnDecrypt = function(bDecode)
 	{
 		//var aResult = this.sText.split('');
 		//var oTextEncoder = new TextEncoder();
 		//var aResult = oTextEncoder.encode(this.sText);
 		var aResult = new TextEncoder2("windows-1251", {NONSTANDARD_allowLegacyEncoding: true}).encode(this.sText);
+		
+		if (bDecode) {
+			aResult = this.fnDecode(aResult);
+		}
 		
 		var iCommandsBlockLength = this.aKey[0];
 		var iValuesBlockLength = this.aKey[1];
@@ -3586,11 +3646,8 @@ document
 				//if ($("#text-encoded").val().trim()!='')
 				//	$("#text-original").val($("#text-encoded").val());
 				oEncoder.sText = $("#text-original").val();
-				oEncoder.fnEncrypt();
-				if ($("#use_dictonary").prop("checked")) {
-					oEncoder.sDictonary = $("#dictonary").val();
-					oEncoder.fnEncode();
-				}
+				oEncoder.sDictonary = $("#dictonary").val();
+				oEncoder.fnEncrypt($("#use_dictonary").prop("checked"));
 				$("#text-encoded").val(oEncoder.sResult);
 			}
 			
@@ -3598,11 +3655,8 @@ document
 				if ($("#text-encoded").val().trim()!='')
 					$("#text-original").val($("#text-encoded").val());
 				oEncoder.sText = $("#text-original").val();
-				if ($("#use_dictonary").prop("checked")) {
-					oEncoder.sDictonary = $("#dictonary").val();
-					oEncoder.fnDecode();
-				}
-				oEncoder.fnDecrypt();
+				oEncoder.sDictonary = $("#dictonary").val();
+				oEncoder.fnDecrypt($("#use_dictonary").prop("checked"));
 				$("#text-encoded").val(oEncoder.sResult);
 			}
 			
