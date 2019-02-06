@@ -3330,7 +3330,7 @@ var Encoder = function(sText)
 				iRemainder += aInt2[iIndex];
 			}
 			
-			aResult.push(iSum % 10);
+			aResult.push(iRemainder % 10);
 			
 			iRemainder = Math.floor(iRemainder / 10);
 		}
