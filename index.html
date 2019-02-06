@@ -17,6 +17,9 @@
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>  
 
+<script src="/lib/text-encoding/lib/encoding-indexes.js"></script>
+<script src="/lib/text-encoding/lib/encoding.js"></script>
+
 </head>
 
 <body>
@@ -145,11 +148,35 @@ var Encoder = function(sText)
 		return aArray[iPosition];
 	}
 	
+	this.fnToBigInt = function(iInt)
+	{
+		
+	}
+	
+	this.fnBigIntPower = function(aInt1, iBase)
+	{
+		
+	}
+	
+	this.fnBigIntMultiply = function(aInt1, aInt2)
+	{
+		
+	}
+	
+	this.fnBigIntSummarize  = function(aInt1, aInt2)
+	{
+		
+	}
+	
 	this.fnEncode = function()
 	{
-		this.sResult;
+		var aText = this.sResult.split('');
 		
-		
+		for (var iIndex=0; iIndex<aText.length; iIndex++) {
+			aText[iIndex].charCodeAt(0);
+		}
+
+		return;
 	}
 	
 	this.fnDecode = function()
@@ -159,7 +186,9 @@ var Encoder = function(sText)
 	
 	this.fnEncrypt = function()
 	{
-		var aResult = this.sText.split('');
+		//var aResult = this.sText.split('');
+		var oTextEncoder = new TextEncoder();
+		var aResult = oTextEncoder.encode(this.sText);
 		
 		var iCommandsBlockLength = this.aKey[0];
 		var iValuesBlockLength = this.aKey[1];
@@ -186,42 +215,52 @@ var Encoder = function(sText)
 				case 2:
 					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
 						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex*iCommandIndex);
-						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+						//var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex], 1);
 						
 						for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
 							aBitArray = this.fnLeftToRightShiftArray(aBitArray);
 						}
 				
-						aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+						//aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+						aResult[iIndex] = this.fnConvertBitArrayToInt(aBitArray, 1);
 					}
 					break;
 				case 3:
 					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
 						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex*iCommandIndex);
-						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+						//var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex], 1);
 
 						for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
 							aBitArray = this.fnRightToLeftShiftArray(aBitArray);
 						}
 				
-						aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+						//aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+						aResult[iIndex] = this.fnConvertBitArrayToInt(aBitArray, 1);
 					}
 					break;
 				case 4:
 					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
 						var iMask = this.fnGetValueFromArrayLooped(aValues, iIndex*iCommandIndex);
-						aResult[iIndex] = String.fromCharCode(aResult[iIndex].charCodeAt(0) ^ iMask);
+						//aResult[iIndex] = String.fromCharCode(aResult[iIndex].charCodeAt(0) ^ iMask);
+						aResult[iIndex] = aResult[iIndex] ^ iMask;
 					}
 					break;
 			}
 		}
 		
-		this.sResult = aResult.join('');
+		//this.sResult = aResult.join('');
+		var oTextDecoder = new TextDecoder("windows-1251");
+		this.sResult = oTextDecoder.decode(aResult);
 	}
 	
 	this.fnDecrypt = function()
 	{
-		var aResult = this.sText.split('');
+		//var aResult = this.sText.split('');
+		//var oTextEncoder = new TextEncoder();
+		//var aResult = oTextEncoder.encode(this.sText);
+		var aResult = new TextEncoder2("windows-1251", {NONSTANDARD_allowLegacyEncoding: true}).encode(this.sText);
 		
 		var iCommandsBlockLength = this.aKey[0];
 		var iValuesBlockLength = this.aKey[1];
@@ -248,37 +287,44 @@ var Encoder = function(sText)
 				case 2:
 					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
 						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex*iCommandIndex);
-						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+						//var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex], 1);
 						
 						for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
 							aBitArray = this.fnRightToLeftShiftArray(aBitArray);
 						}
 				
-						aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+						//aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+						aResult[iIndex] = this.fnConvertBitArrayToInt(aBitArray, 1);
 					}
 					break;
 				case 3:
 					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
 						var iShift = this.fnGetValueFromArrayLooped(aValues, iIndex*iCommandIndex);
-						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+						//var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex].charCodeAt(0), 1);
+						var aBitArray = this.fnConvertIntToBitArray(aResult[iIndex], 1);
 						
 						for (var iShiftIndex=0; iShiftIndex<iShift; iShiftIndex++) {
 							aBitArray = this.fnLeftToRightShiftArray(aBitArray);
 						}
 				
-						aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+						//aResult[iIndex] = String.fromCharCode(this.fnConvertBitArrayToInt(aBitArray, 1));
+						aResult[iIndex] = this.fnConvertBitArrayToInt(aBitArray, 1);
 					}
 					break;
 				case 4:
 					for (var iIndex=0; iIndex<aResult.length; iIndex++) {
 						var iMask = this.fnGetValueFromArrayLooped(aValues, iIndex*iCommandIndex);
-						aResult[iIndex] = String.fromCharCode(aResult[iIndex].charCodeAt(0) ^ iMask);
+						//aResult[iIndex] = String.fromCharCode(aResult[iIndex].charCodeAt(0) ^ iMask);
+						aResult[iIndex] = aResult[iIndex] ^ iMask;
 					}
 					break;
 			}
 		}
 		
-		this.sResult = aResult.join('');
+		//this.sResult = aResult.join('');
+		var oTextDecoder = new TextDecoder("utf-8");
+		this.sResult = oTextDecoder.decode(aResult);
 	}
 	
 	this.fnLeftToRightShiftArray = function(aArray)
