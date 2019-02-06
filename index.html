@@ -34,10 +34,16 @@
 </ul>
 <div class="tab-content" id="myTabContent">
   <div class="tab-pane fade" id="key" role="tabpanel" aria-labelledby="key-tab">
-  	<button id="generate-key">Generate</button>
+  	<button id="generate-key">Generate key</button>
+  	<button id="reset">Reset</button>
   	<button id="encrypt">Encrypt</button>
   	<button id="decrypt">Decrypt</button>
+  	<label><input type="checkbox" id="use_dictonary">Use dictonary of symbols to encode encrypted string</label>
   	<br>
+  	Dictonary:
+  	<textarea id="dictonary" style="width:100%">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</textarea>
+  	<br>
+  	Key:
   	<textarea id="key-bytes" style="width:100%"></textarea>
   </div>
   <div class="tab-pane fade" id="shift" role="tabpanel" aria-labelledby="shift-tab">
@@ -62,6 +68,7 @@
 
 <hr>
 
+<textarea id="text-lorem" style="display:none">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</textarea>
 <textarea id="text-original" style="width:49%;height:300px">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</textarea>
 <textarea id="text-encoded" style="width:49%;height:300px"></textarea>
 		
@@ -386,15 +393,21 @@ document
 				}
 			}
 			
+			if (oEvent.target.id=="reset") {
+				$("#text-original").val($("#text-lorem").val());
+				$("#text-encoded").val('');
+			}
+			
 			if (oEvent.target.id=="encrypt") {
-				if ($("#text-encoded").val().trim()!='')
-					$("#text-original").val($("#text-encoded").val());
+				//if ($("#text-encoded").val().trim()!='')
+				//	$("#text-original").val($("#text-encoded").val());
 				oEncoder.sText = $("#text-original").val();
 				$("#text-encoded").val(oEncoder.fnEncrypt());
 			}
 			
 			if (oEvent.target.id=="decrypt") {
-				$("#text-original").val($("#text-encoded").val());
+				if ($("#text-encoded").val().trim()!='')
+					$("#text-original").val($("#text-encoded").val());
 				oEncoder.sText = $("#text-original").val();
 				$("#text-encoded").val(oEncoder.fnDecrypt());
 			}
