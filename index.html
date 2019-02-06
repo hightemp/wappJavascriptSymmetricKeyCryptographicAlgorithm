@@ -3356,35 +3356,74 @@ var Encoder = function(sText)
 		return aResult;
 	}
 	
+	this.fnBigIntMax = function(aInt1, aInt2)
+	{
+		if (aInt1.length>aInt2.length) {
+			return aInt1;
+		} else if (aInt1.length<aInt2.length) {
+			return aInt2;
+		} else {
+			for (var iIndex=aInt1.length-1; iIndex>=0; iIndex--) {
+				if (aInt1[iIndex]>aInt2[iIndex]) {
+					return aInt1;
+				}
+				if (aInt1[iIndex]<aInt2[iIndex]) {
+					return aInt2;
+				}
+			}
+			return [];
+		}
+	}
+
+	this.fnBigIntMin = function(aInt1, aInt2)
+	{
+		if (aInt1.length>aInt2.length) {
+			return aInt2;
+		} else if (aInt1.length<aInt2.length) {
+			return aInt1;
+		} else {
+			for (var iIndex=aInt1.length-1; iIndex>=0; iIndex--) {
+				if (aInt1[iIndex]>aInt2[iIndex]) {
+					return aInt2;
+				}
+				if (aInt1[iIndex]<aInt2[iIndex]) {
+					return aInt1;
+				}
+			}
+			return [];
+		}
+	}
+	
 	this.fnBigIntSubtract = function(aInt1, aInt2)
 	{
 		var aResult = [];
-		var iMaxLength = Math.max(aInt1.length, aInt2.length);
-		
-		for (var iIndex=0; iIndex<iMaxLength; iIndex++) {
+		var aTempIntBigger = this.fnBigIntMax(aInt1, aInt2).slice();
+		var aTempIntSmaller = this.fnBigIntMin(aInt1, aInt2).slice();
+
+		for (var iIndex=0; iIndex<aTempIntBigger.length; iIndex++) {
 			var iResult = 0;
 
-			if (typeof aInt1[iIndex] !== 'undefined') {
-				iResult = aInt1[iIndex];
+			if (typeof aTempInt1[iIndex] !== 'undefined') {
+				iResult = aTempInt1[iIndex];
 			}
 			
 			if (typeof aInt2[iIndex] !== 'undefined') {
 				var iSubtractionResult = iResult - aInt2[iIndex];
 				
 				if (iSubtractionResult<0) {
-					aInt2[iIndex+1]--;
+					if (typeof aTempInt1[iIndex] !== 'undefined') {
+						aTempInt1[iIndex+1]--;
+					}
 				}
 				
 				iResult = Math.abs(iSubtractionResult);
 			}
 			
-			aResult.push(iRemainder % 10);
-			
-			iRemainder = Math.floor(iRemainder / 10);
+			aResult.push(iResult);
 		}
 		
-		if (iRemainder) {
-			aResult.push(iRemainder);
+		if (!aResult.length) {
+			aResult = [0];
 		}
 		
 		return aResult;
