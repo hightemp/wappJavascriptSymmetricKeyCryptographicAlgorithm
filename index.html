@@ -3276,25 +3276,31 @@ var Encoder = function(sText)
 	{
 		var aResult = [];
 		
-		for (var iIndex=Math.round(Math.log10(iInt)); iIndex>=0; iIndex--) {
-			aResult.push(Math.round((iInt/Math.pow(10, iIndex))%10));
+		for (var iIndex=0; iIndex<=Math.floor(Math.log10(iInt)); iIndex++) {
+			aResult.push(Math.floor((iInt/Math.pow(10, iIndex))%10));
 		}
 		
 		return aResult;
 	}
 	
-	this.fnBigIntPower = function(aInt1, iBase)
+	this.fnBigIntPower = function(aInt, iBasement)
 	{
+		var aResult = aInt;
 		
+		for (var iIndex=2; iIndex<=iBasement; iIndex++) {
+			aResult = this.fnBigIntMultiply(aResult, aInt);
+		}
+		
+		return aResult;
 	}
 	
 	this.fnBigIntMultiply = function(aInt1, aInt2)
 	{
 		var aResult = [];
 		var aNumbersToSummarize = [];
-		var iRemainder = 0;
 		
 		for (var iIndex1=0; iIndex1<aInt1.length; iIndex1++) {
+			var iRemainder = 0;
 			var aNumber = [];
 			
 			for (var iShiftIndex=0; iShiftIndex<iIndex1; iShiftIndex++) {
@@ -3309,9 +3315,13 @@ var Encoder = function(sText)
 				iRemainder = Math.floor(iMultiplyResult / 10);
 			}
 			
+			if (iRemainder) {
+				aNumber.push(iRemainder);
+			}
+			
 			aNumbersToSummarize.push(aNumber);
 		}
-		
+
 	    for (var iIndex=0; iIndex<aNumbersToSummarize.length; iIndex++) {
 	    	aResult = this.fnBigIntSummarize(aNumbersToSummarize[iIndex], aResult);
 	    }
@@ -3319,7 +3329,7 @@ var Encoder = function(sText)
 		return aResult;
 	}
 	
-	this.fnBigIntSummarize  = function(aInt1, aInt2)
+	this.fnBigIntSummarize = function(aInt1, aInt2)
 	{
 		var aResult = [];
 		var iRemainder = 0;
@@ -3346,12 +3356,58 @@ var Encoder = function(sText)
 		return aResult;
 	}
 	
+	this.fnBigIntSubtract = function(aInt1, aInt2)
+	{
+		var aResult = [];
+		var iMaxLength = Math.max(aInt1.length, aInt2.length);
+		
+		for (var iIndex=0; iIndex<iMaxLength; iIndex++) {
+			var iResult = 0;
+
+			if (typeof aInt1[iIndex] !== 'undefined') {
+				iResult = aInt1[iIndex];
+			}
+			
+			if (typeof aInt2[iIndex] !== 'undefined') {
+				var iSubtractionResult = iResult - aInt2[iIndex];
+				
+				if (iSubtractionResult<0) {
+					aInt2[iIndex+1]--;
+				}
+				
+				iResult = Math.abs(iSubtractionResult);
+			}
+			
+			aResult.push(iRemainder % 10);
+			
+			iRemainder = Math.floor(iRemainder / 10);
+		}
+		
+		if (iRemainder) {
+			aResult.push(iRemainder);
+		}
+		
+		return aResult;
+	}
+	
 	this.fnEncode = function(aByteArray)
 	{
 		var aResult = [];
 		
+		var aDecemicalNumber = [];
+		var aDecemicalRatio = this.fnToBigInt(10);
+		
 		for (var iIndex=0; iIndex<aResult.length; iIndex++) {
 			var aNumber = this.fnToBigInt(aResult[iIndex]);
+			var aDecemicalRatioPowered = this.fnBigIntPower(aDecemicalRatio, iIndex);
+			aNumber = this.fnBigIntMultiply(aNumber, aDecemicalRatioPowered);
+			aDecemicalNumber = this.fnBigIntSummarize(aNumber, aDecemicalNumber);
+		}
+		
+		var iDictonaryLength = this.sDictonary;
+		
+		for () {
+			
 		}
 
 		return;
