@@ -3312,6 +3312,10 @@ var Encoder = function(sText)
 			aNumbersToSummarize.push(aNumber);
 		}
 		
+	    for (var iIndex=0; iIndex<aNumbersToSummarize.length; iIndex++) {
+	    	aResult = this.fnBigIntSummarize(aNumbersToSummarize[iIndex], aResult);
+	    }
+    
 		return aResult;
 	}
 	
