@@ -21,7 +21,7 @@
 <body>
 
 <ul class="nav nav-tabs" id="myTab" role="tablist">
-  <li class="nav-item">
+  <li class="nav-item active">
     <a class="nav-link" id="key-tab" data-toggle="tab" href="#key" role="tab" aria-controls="key" aria-selected="true">Key</a>
   </li>
   <li class="nav-item">
@@ -32,7 +32,7 @@
   </li>
 </ul>
 <div class="tab-content" id="myTabContent">
-  <div class="tab-pane fade" id="key" role="tabpanel" aria-labelledby="key-tab">
+  <div class="tab-pane fade active in" id="key" role="tabpanel" aria-labelledby="key-tab">
   	<button id="generate-key">Generate key</button>
   	<button id="reset">Reset</button>
   	<button id="encrypt">Encrypt</button>
@@ -3205,7 +3205,7 @@ var Encoder = function(sText)
 {
 	this.sText = sText || '';
 	this.sResult = '';
-	this.sDictonary = '';
+	this.sDictonary = 'abcdef';
 	this.aKey = [];
 	
 	this.fnShuffleArray = function(aArray) 
@@ -3431,31 +3431,71 @@ var Encoder = function(sText)
 	
 	this.fnEncode = function(aByteArray)
 	{
-		var aResult = [];
-		
-		var aDecemicalNumber = [];
-		var aDecemicalRatio = this.fnToBigInt(10);
-		
-		for (var iIndex=0; iIndex<aResult.length; iIndex++) {
-			var aNumber = this.fnToBigInt(aResult[iIndex]);
-			var aDecemicalRatioPowered = this.fnBigIntPower(aDecemicalRatio, iIndex);
-			aNumber = this.fnBigIntMultiply(aNumber, aDecemicalRatioPowered);
-			aDecemicalNumber = this.fnBigIntSummarize(aNumber, aDecemicalNumber);
-		}
-		
-		var iDictonaryLength = this.sDictonary;
-		
-		for () {
-			
-		}
-
-		return;
+    /*
+    var aDecemicalNumber = [];
+    var aDecemicalRatio = this.fnToBigInt(10);
+    
+    for (var iIndex=0; iIndex<aResult.length; iIndex++) {
+    	var aNumber = this.fnToBigInt(aResult[iIndex]);
+    	var aDecemicalRatioPowered = this.fnBigIntPower(aDecemicalRatio, iIndex);
+    	aNumber = this.fnBigIntMultiply(aNumber, aDecemicalRatioPowered);
+    	aDecemicalNumber = this.fnBigIntSummarize(aNumber, aDecemicalNumber);
+    }
+    */
+    var iDictonaryLength = this.sDictonary.length;
+    
+    var iDigits = Math.ceil(255 / iDictonaryLength);
+    
+    var oResultArrayBuffer = new ArrayBuffer(aByteArray.length*iDigits);
+    var aResult = new Uint8Array(oResultArrayBuffer);
+    
+    for (var iIndex=0; iIndex<aByteArray.length; iIndex++) {
+      var aNewValue = [];
+      var iValue = aByteArray[iIndex];
+      var iNewDigits = Math.ceil(iValue / iDictonaryLength);
+      
+      while (iValue>0) {
+        aNewValue.push(this.sDictonary[iValue % iDictonaryLength].charCodeAt(0));
+        //aResult.push(this.sDictonary[iValue % iDictonaryLength]);
+        iValue = Math.floor(iValue / iDictonaryLength);
+      }
+      
+      for (var iDigitsIndex=0; iDigitsIndex<Math.floor(aNewValue.length/2); iDigitsIndex++) {
+        var iTemp = aNewValue[iDigitsIndex];
+        aNewValue[iDigitsIndex] = aNewValue[aNewValue.length-1-iDigitsIndex];
+        aNewValue[aNewValue.length-1-iDigitsIndex] = iTemp;
+      }
+      
+      for (var iAdditionalDigitsIndex=0; iAdditionalDigitsIndex<iDigits - iNewDigits; iAdditionalDigitsIndex++) {
+        aNewValue.splice(0, 0, this.sDictonary[0].charCodeAt(0));
+        //aResult.push(this.sDictonary[0]);
+      }
+    }
+    
+    return aResult;
 	}
 	
 	this.fnDecode = function(aByteArray)
 	{
 		var aResult = [];
 		
+    var iDictonaryLength = this.sDictonary.length;
+    
+    var iDigits = Math.ceil(255 / iDictonaryLength);
+    
+    var oResultArrayBuffer = new ArrayBuffer(aByteArray.length/iDigits);
+    var aResult = new Uint8Array(oResultArrayBuffer);
+    
+    for (var iIndex=0; iIndex<Math.floor(aByteArray.length/iDigits); iIndex++) {
+      var iValue = 0;
+      
+      for (var iDigitsIndex=iDigits-1; iDigitsIndex>=0; iDigitsIndex--) {
+        iValue += this.sDictonary.indexOf(String.fromCharCode(aByteArray[iIndex])) * Math.pow(10, iDigitsIndex);
+      }
+      
+      aResult.push(iValue);
+    }    
+    
 		return aResult;
 	}
 	
@@ -3527,7 +3567,7 @@ var Encoder = function(sText)
 		
 		if (bEncode) {
 			aResult = this.fnEncode(aResult);
-		}
+		}console.log(aResult);
 		
 		//this.sResult = aResult.join('');
 		var oTextDecoder = new TextDecoder("windows-1251");
